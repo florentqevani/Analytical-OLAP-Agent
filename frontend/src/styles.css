@@ -1,0 +1,328 @@
+:root {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: #dbe8f6;
+    background-color: #031021;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    background:
+        linear-gradient(90deg, rgba(54, 105, 172, 0.14) 1px, transparent 1px) 0
+            0 / 36px 36px,
+        linear-gradient(rgba(54, 105, 172, 0.12) 1px, transparent 1px) 0 0 /
+            36px 36px,
+        radial-gradient(circle at 80% 0, #1c5f5f, transparent 44%),
+        linear-gradient(140deg, #07172c 20%, #041224 65%, #062335 100%);
+}
+
+.workspace {
+    width: min(1360px, 94vw);
+    margin: 1.6rem auto;
+    padding-bottom: 2rem;
+}
+
+.workspace-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.eyebrow {
+    margin: 0;
+    color: #8ea8c0;
+    letter-spacing: 0.12rem;
+    font-size: 0.73rem;
+}
+
+h1 {
+    margin: 0.4rem 0 0;
+    font-family: Cambria, Georgia, "Times New Roman", serif;
+    font-size: clamp(2.2rem, 4vw, 3.6rem);
+    line-height: 1.1;
+    color: #e6efff;
+}
+
+h2,
+h3 {
+    margin: 0;
+    font-family: Cambria, Georgia, "Times New Roman", serif;
+}
+
+.badge-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.86rem;
+    border-radius: 999px;
+    padding: 0.35rem 0.85rem;
+    border: 1px solid transparent;
+    background: rgba(102, 124, 145, 0.12);
+    color: #cee0f4;
+}
+
+.pill-idle {
+    background: rgba(30, 120, 104, 0.22);
+    border-color: rgba(72, 175, 151, 0.42);
+}
+
+.pill-running {
+    background: rgba(45, 153, 221, 0.18);
+    border-color: rgba(73, 173, 240, 0.55);
+}
+
+.pill-provider {
+    background: rgba(178, 140, 52, 0.18);
+    border-color: rgba(217, 177, 89, 0.58);
+    color: #f2dca2;
+}
+
+.metric-pill {
+    background: rgba(72, 123, 170, 0.22);
+    border-color: rgba(89, 151, 207, 0.55);
+    color: #b8d9f5;
+}
+
+.workspace-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 1rem;
+}
+
+.panel {
+    border-radius: 18px;
+    border: 1px solid rgba(80, 141, 189, 0.28);
+    background: linear-gradient(
+        145deg,
+        rgba(7, 35, 59, 0.86),
+        rgba(2, 20, 36, 0.92) 60%
+    );
+    box-shadow: inset 0 1px 0 rgba(168, 211, 245, 0.1);
+    padding: 1rem;
+}
+
+.controls {
+    min-height: 660px;
+}
+
+.field-label {
+    display: grid;
+    gap: 0.5rem;
+    color: #cadbeb;
+    font-size: 0.97rem;
+    margin-top: 0.65rem;
+}
+
+input,
+select,
+textarea,
+button {
+    font: inherit;
+}
+
+input[type="file"],
+select,
+textarea {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(106, 153, 191, 0.42);
+    background: rgba(0, 10, 22, 0.85);
+    color: #d9e9fa;
+    padding: 0.62rem 0.75rem;
+}
+
+input[type="file"]::file-selector-button {
+    margin-right: 0.75rem;
+    border-radius: 10px;
+    border: 1px solid rgba(94, 179, 168, 0.55);
+    background: linear-gradient(180deg, #18493f, #11362f);
+    color: #d9f8ef;
+    padding: 0.48rem 0.9rem;
+    cursor: pointer;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 95px;
+}
+
+.meta {
+    margin: 0.45rem 0;
+    color: #9db4c9;
+}
+
+.panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.65rem;
+}
+
+.console {
+    margin: 0.5rem 0 1rem;
+    min-height: 260px;
+    max-height: 360px;
+    overflow: auto;
+    border-radius: 13px;
+    border: 1px solid rgba(74, 130, 171, 0.32);
+    background: rgba(0, 10, 22, 0.82);
+    padding: 0.95rem;
+    font-family: Consolas, "Courier New", monospace;
+    color: #b8d3ed;
+    white-space: pre-wrap;
+}
+
+.primary-btn,
+.secondary-btn {
+    border: 1px solid transparent;
+    border-radius: 12px;
+    padding: 0.66rem 1.1rem;
+    cursor: pointer;
+}
+
+.primary-btn {
+    margin-top: 0.35rem;
+    background: linear-gradient(180deg, #54d0ca, #33abb3);
+    color: #07212b;
+    font-weight: 700;
+}
+
+.secondary-btn {
+    background: rgba(117, 142, 168, 0.19);
+    border-color: rgba(120, 155, 189, 0.42);
+    color: #d7e7f8;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.error {
+    color: #ff9090;
+    margin-top: 0.75rem;
+}
+
+.chart-wrap {
+    margin-top: 0.9rem;
+    border-radius: 12px;
+    border: 1px solid rgba(78, 138, 183, 0.36);
+    background: rgba(2, 16, 30, 0.75);
+    padding: 0.75rem;
+}
+
+.chart-wrap h3 {
+    margin-bottom: 0.65rem;
+    color: #cae4ff;
+}
+
+.chart-bars {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.bar-row {
+    display: grid;
+    grid-template-columns: 170px 1fr 95px;
+    gap: 0.5rem;
+    align-items: center;
+    font-size: 0.86rem;
+}
+
+.bar-label {
+    color: #aac3d8;
+}
+
+.bar-track {
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(89, 132, 166, 0.25);
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #3fd0c7, #50aaf2);
+}
+
+.bar-value {
+    text-align: right;
+    color: #d7e9fb;
+}
+
+.history {
+    margin-top: 1rem;
+}
+
+.charts-panel {
+    margin-top: 1rem;
+}
+
+.history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0;
+    display: grid;
+    gap: 0.55rem;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.7rem;
+    border: 1px solid rgba(81, 133, 173, 0.35);
+    border-radius: 12px;
+    background: rgba(4, 18, 34, 0.72);
+    padding: 0.68rem 0.75rem;
+}
+
+.history-title {
+    margin: 0;
+    color: #e0eeff;
+    font-size: 0.95rem;
+}
+
+.history-sub {
+    margin: 0.2rem 0 0;
+    color: #8ca8be;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 1080px) {
+    .workspace-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .controls {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 760px) {
+    .workspace {
+        width: min(96vw, 96vw);
+    }
+
+    .bar-row {
+        grid-template-columns: 120px 1fr 80px;
+    }
+}
