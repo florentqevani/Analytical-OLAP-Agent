@@ -9,7 +9,7 @@ services:
       - key: OPENAI_API_KEY
         sync: false
       - key: CORS_ORIGINS
-        sync: false
+        value: "*"
       - key: WAREHOUSE_DB_PATH
         value: retail_warehouse.duckdb
       - key: HISTORY_DB_PATH
