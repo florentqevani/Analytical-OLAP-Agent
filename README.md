@@ -1,75 +1,183 @@
-# Analytical-OLAP-Agent
+# Analytical OLAP Agent
 
-## Project Structure
+Multi-agent retail analytics app with:
+- `frontend`: React/Vite UI
+- `api`: FastAPI HTTP layer
+- `planner`: orchestration + agent dispatch
+- `agents`: LangChain/OpenAI-backed analytics agents
+- `data_access`: DuckDB warehouse + history store
 
-```
+The system can run with or without an OpenAI key. Without `OPENAI_API_KEY`, agents return deterministic fallback summaries from warehouse aggregates.
+
+## Runtime Topology
+
+1. Frontend calls API (`/agents`, `/analyze`, `/history`).
+2. API validates request and routes to `PlannerOrchestrator`.
+3. Orchestrator resolves `agent_id` from `AGENT_REGISTRY`, executes agent, stores run in history DB.
+4. Agent reads warehouse aggregates from DuckDB and returns report JSON.
+5. History API reads persisted runs for a `user_id`.
+
+## Repository Map
+
+```text
 .
-├─ frontend/               # React frontend (Vite)
-│  ├─ src/App.jsx
-│  └─ package.json
-├─ api/                    # FastAPI API layer
-│  ├─ main.py
-│  └─ schemas.py
-├─ planner/                # Planner / orchestrator
-│  └─ orchestrator.py
-├─ agents/                 # LangChain agents (OpenAI-backed)
-│  ├─ langchain_agent.py
-│  └─ __init__.py
-├─ data_access/            # Data access + star schema
-│  ├─ warehouse.py
-│  ├─ history_store.py
-│  ├─ star_schema.sql
-│  └─ build_star_schema.py
-├─ global_retail_sales.csv
-├─ retail_warehouse.duckdb
-├─ ARCHITECTURE.md
-└─ requirements.txt
+├─ api/                    # FastAPI app + request/response schemas
+├─ agents/                 # Agent interface + LangChain implementation + registry
+├─ planner/                # Run coordination and history writes
+├─ data_access/            # DuckDB warehouse + history DB adapters + schema SQL
+├─ frontend/               # React client
+├─ scripts/check_api.py    # Basic API smoke check
+├─ render.yaml             # Render Blueprint (API + static frontend)
+└─ docker-compose.yml      # Local multi-service stack
 ```
 
-## Quick Start
+## API Contract
 
-### Deploy on Render (recommended)
+Base URL:
+- Docker Compose default: `http://localhost:8001`
+- Direct Uvicorn default: `http://localhost:8000`
 
-This repository now includes a Render Blueprint in `render.yaml` that deploys:
+### `GET /health`
+Response:
+```json
+{ "status": "ok" }
+```
 
-- `analytical-olap-agent-api` (FastAPI web service)
+### `GET /agents`
+Response:
+```json
+{
+  "agents": [
+    { "agent_id": "dimension_navigator", "label": "Dimension Navigator Agent" }
+  ]
+}
+```
+
+### `POST /analyze`
+Request:
+```json
+{
+  "user_id": "demo_user",
+  "agent_id": "kpi_calculator",
+  "prompt": "Analyze MoM and YoY revenue changes."
+}
+```
+
+Response shape:
+```json
+{
+  "history_id": "uuid",
+  "agent_id": "kpi_calculator",
+  "agent_label": "KPI Calculator Agent",
+  "result": {
+    "message": "string",
+    "report": {
+      "title": "string",
+      "executiveSummary": "string",
+      "keyFindings": ["string"],
+      "risks": ["string"],
+      "recommendations": ["string"],
+      "chartHint": { "dimension": "string", "metric": "string" },
+      "chartData": {
+        "title": "string",
+        "unit": "string",
+        "series": [{ "label": "string", "value": 123.4 }]
+      }
+    }
+  }
+}
+```
+
+Validation limits:
+- `user_id`: 1..120 chars
+- `agent_id`: 1..80 chars
+- `prompt`: 1..3000 chars
+
+### `GET /history?user_id=<id>&limit=<n>`
+- `limit` range: 1..200 (default 50)
+- Returns most recent first.
+
+## Environment Variables
+
+| Variable | Required | Default | Used By | Notes |
+|---|---|---|---|---|
+| `OPENAI_API_KEY` | No | empty | API/agents | If missing, fallback mode is used. |
+| `OPENAI_MODEL` | No | `gpt-4o-mini` | API/agents | LLM model for LangChain agent calls. |
+| `WAREHOUSE_DB_PATH` | No | `retail_warehouse.duckdb` | API/data_access | DuckDB file with star schema tables. |
+| `HISTORY_DB_PATH` | No | `agent_history.duckdb` | API/data_access | DuckDB file for `agent_history`. |
+| `CSV_PATH` | No | `global_retail_sales.csv` | API entrypoint | Used only when warehouse DB must be built at startup. |
+| `CORS_ORIGINS` | No | built-in allowlist | API | Comma-separated origins. |
+| `VITE_API_URL` | Yes (frontend) | none | Frontend | Required; frontend fails requests if unset. |
+| `API_HOST_PORT` | No | `8001` | docker-compose | Host bind for API container port 8000. |
+| `FRONTEND_HOST_PORT` | No | `5174` | docker-compose | Host bind for frontend container port 5174. |
+
+## Local Development
+
+### Option A: Docker Compose (recommended)
+
+1. Create/update `.env` with at least:
+```bash
+OPENAI_API_KEY=...
+```
+2. Start services:
+```bash
+docker compose up --build
+```
+3. Validate:
+- Frontend: `http://localhost:5174`
+- API health: `http://localhost:8001/health`
+
+Optional host-port override:
+```bash
+API_HOST_PORT=8000 FRONTEND_HOST_PORT=5173 docker compose up --build
+```
+
+### Option B: Run services directly
+
+Backend:
+```bash
+pip install -r requirements.txt
+python data_access/build_star_schema.py --db retail_warehouse.duckdb --csv global_retail_sales.csv
+uvicorn api.main:app --reload
+```
+
+Frontend:
+```bash
+cd frontend
+npm install
+# Required for frontend requests:
+# set VITE_API_URL=http://localhost:8000   (Windows PowerShell: $env:VITE_API_URL="http://localhost:8000")
+npm run dev
+```
+
+## Deployment (Render Blueprint)
+
+`render.yaml` provisions:
+- `analytical-olap-agent-api` (Python web service)
 - `analytical-olap-agent-frontend` (static site)
 
-Steps:
+Wiring:
+- Frontend `VITE_API_URL` <- API `RENDER_EXTERNAL_URL`
+- API `CORS_ORIGINS` <- Frontend `RENDER_EXTERNAL_URL`
 
-1. Push this repo to GitHub.
-2. In Render, create a new Blueprint and select this repo.
-3. Set `OPENAI_API_KEY` for the API service.
-4. Deploy.
+Only secret you must set manually:
+- `OPENAI_API_KEY` on the API service.
 
-The Blueprint wires:
+## Operational Notes
 
-- Frontend `VITE_API_URL` -> API `RENDER_EXTERNAL_URL`
-- API `CORS_ORIGINS` -> Frontend `RENDER_EXTERNAL_URL`
+- API startup checks warehouse and history DB connectivity and logs results.
+- In containerized runs, `api/entrypoint.sh` builds the warehouse DB automatically if `WAREHOUSE_DB_PATH` does not exist.
+- History persistence is local DuckDB. In Docker Compose it is backed by `duckdb_data` volume.
 
-### Run with Docker (recommended)
+## Smoke Test
 
-1. Add your OpenAI key in `.env`:
-   - `OPENAI_API_KEY=your_key_here`
-2. Build and run:
-   - `docker compose up --build`
-3. Open:
-   - UI: `http://localhost:5174`
-   - API health: `http://localhost:8001/health`
-4. Optional host port overrides:
-   - `API_HOST_PORT=8000 FRONTEND_HOST_PORT=5173 docker compose up --build`
+After API is up:
+```bash
+python scripts/check_api.py --base-url http://127.0.0.1:8001
+```
 
-### Run without Docker
+## Extending Agents
 
-1. Install Python dependencies:
-   - `pip install -r requirements.txt`
-2. Build star schema (if needed):
-   - `python data_access/build_star_schema.py --db retail_warehouse.duckdb --csv global_retail_sales.csv`
-3. Set OpenAI API key:
-   - `OPENAI_API_KEY=...`
-4. Run API:
-   - `uvicorn api.main:app --reload`
-5. Run React frontend:
-   - `cd frontend`
-   - `npm install`
-   - `npm run dev`
+1. Register a new agent in `agents/__init__.py` (`AGENT_REGISTRY`).
+2. Implement behavior by extending `AnalyticsAgent` or reusing `LangChainAnalyticsAgent`.
+3. Keep output aligned with current report schema (`message` + `report` object), since frontend rendering assumes this contract.
