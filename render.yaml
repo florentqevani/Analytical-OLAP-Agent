@@ -4,9 +4,15 @@ services:
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    startCommand: sh api/entrypoint.sh
     envVars:
       - key: OPENAI_API_KEY
         sync: false
       - key: CORS_ORIGINS
         sync: false
+      - key: WAREHOUSE_DB_PATH
+        value: retail_warehouse.duckdb
+      - key: HISTORY_DB_PATH
+        value: agent_history.duckdb
+      - key: CSV_PATH
+        value: global_retail_sales.csv

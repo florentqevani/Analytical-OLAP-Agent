@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 const API_BASE_DEFAULT =
-  import.meta.env.VITE_API_BASE || "http://localhost:8000";
+  import.meta.env.VITE_API_BASE ||
+  (import.meta.env.DEV ? "http://localhost:8000" : "/api");
 const DEFAULT_USER_ID = "demo_user";
 const DEFAULT_PROMPT =
   "Example: drill down revenue from Year to Quarter to Month, then roll up daily variance to quarter.";
