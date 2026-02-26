@@ -1,8 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { analyzePrompt, getAgents, getHistory } from "./services/api";
 
-const API_BASE_DEFAULT =
-  import.meta.env.VITE_API_BASE ||
-  (import.meta.env.DEV ? "http://localhost:8000" : "/api");
 const DEFAULT_USER_ID = "demo_user";
 const DEFAULT_PROMPT =
   "Example: drill down revenue from Year to Quarter to Month, then roll up daily variance to quarter.";
@@ -114,7 +112,6 @@ function buildChartModel(runResult) {
 }
 
 function App() {
-  const [apiBase] = useState(API_BASE_DEFAULT);
   const [userId] = useState(DEFAULT_USER_ID);
   const [agents, setAgents] = useState([]);
   const [selectedAgent, setSelectedAgent] = useState("");
@@ -154,11 +151,7 @@ function App() {
 
   async function loadAgents() {
     setError("");
-    const resp = await fetch(`${apiBase}/agents`);
-    const payload = await resp.json();
-    if (!resp.ok) {
-      throw new Error(payload.detail || "Failed to load agents");
-    }
+    const payload = await getAgents();
     const nextAgents = payload.agents || [];
     setAgents(nextAgents);
     if (!selectedAgent && nextAgents.length > 0) {
@@ -167,13 +160,7 @@ function App() {
   }
 
   async function loadHistory() {
-    const resp = await fetch(
-      `${apiBase}/history?user_id=${encodeURIComponent(userId)}&limit=25`,
-    );
-    const payload = await resp.json();
-    if (!resp.ok) {
-      throw new Error(payload.detail || "Failed to load history");
-    }
+    const payload = await getHistory(userId, 25);
     setHistory(payload.items || []);
   }
 
@@ -182,14 +169,14 @@ function App() {
       setError(err.message || "Failed to load agents"),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiBase]);
+  }, []);
 
   useEffect(() => {
     loadHistory().catch((err) =>
       setError(err.message || "Failed to load history"),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiBase, userId]);
+  }, [userId]);
 
   async function onFileChange(event) {
     const file = event.target.files && event.target.files[0];
@@ -243,19 +230,11 @@ function App() {
     setBusy(true);
     setError("");
     try {
-      const resp = await fetch(`${apiBase}/analyze`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: userId,
-          agent_id: selectedAgent,
-          prompt: buildPrompt(),
-        }),
+      const payload = await analyzePrompt({
+        user_id: userId,
+        agent_id: selectedAgent,
+        prompt: buildPrompt(),
       });
-      const payload = await resp.json();
-      if (!resp.ok) {
-        throw new Error(payload.detail || "Analyze failed");
-      }
 
       setActiveRunResult(payload.result || null);
       setConversation(buildConversation(payload.result || null));
@@ -330,6 +309,9 @@ function App() {
               ))}
             </select>
           </label>
+          {agents.length === 0 && !error ? (
+            <p className="meta">Loading agents...</p>
+          ) : null}
 
           <p className="meta">Rows: {rowCount}</p>
           <p className="meta">
