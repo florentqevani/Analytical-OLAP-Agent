@@ -28,6 +28,25 @@
 
 ## Quick Start
 
+### Deploy on Render (recommended)
+
+This repository now includes a Render Blueprint in `render.yaml` that deploys:
+
+- `analytical-olap-agent-api` (FastAPI web service)
+- `analytical-olap-agent-frontend` (static site)
+
+Steps:
+
+1. Push this repo to GitHub.
+2. In Render, create a new Blueprint and select this repo.
+3. Set `OPENAI_API_KEY` for the API service.
+4. Deploy.
+
+The Blueprint wires:
+
+- Frontend `VITE_API_URL` -> API `RENDER_EXTERNAL_URL`
+- API `CORS_ORIGINS` -> Frontend `RENDER_EXTERNAL_URL`
+
 ### Run with Docker (recommended)
 
 1. Add your OpenAI key in `.env`:

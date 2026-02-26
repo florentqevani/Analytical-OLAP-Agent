@@ -1,22 +1,38 @@
 services:
   - type: web
     name: analytical-olap-agent-api
-    env: python
+    runtime: python
     plan: free
-    disk:
-      name: analytical-olap-agent-data
-      mountPath: /var/data
-      sizeGB: 1
     buildCommand: pip install -r requirements.txt
     startCommand: sh api/entrypoint.sh
+    healthCheckPath: /health
     envVars:
       - key: OPENAI_API_KEY
         sync: false
       - key: CORS_ORIGINS
-        value: https://superb-tiramisu-dcfab1.netlify.app,http://localhost:5173,http://localhost:3000
+        fromService:
+          type: web
+          name: analytical-olap-agent-frontend
+          envVarKey: RENDER_EXTERNAL_URL
       - key: WAREHOUSE_DB_PATH
-        value: /var/data/retail_warehouse.duckdb
+        value: data/retail_warehouse.duckdb
       - key: HISTORY_DB_PATH
-        value: /var/data/agent_history.duckdb
+        value: data/agent_history.duckdb
       - key: CSV_PATH
         value: global_retail_sales.csv
+
+  - type: web
+    name: analytical-olap-agent-frontend
+    runtime: static
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: analytical-olap-agent-api
+          envVarKey: RENDER_EXTERNAL_URL
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

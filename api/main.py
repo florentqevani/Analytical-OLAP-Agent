@@ -16,6 +16,7 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 default_allowed_origins = [
+    "https://analytical-olap-agent-frontend.onrender.com",
     "https://superb-tiramisu-dcfab1.netlify.app",
     "http://localhost:5173",
     "http://localhost:3000",
