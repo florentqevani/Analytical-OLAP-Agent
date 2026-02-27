@@ -1,7 +1,11 @@
 # Multi-Agent OLAP Analytics for Retail Decision Support
 
-This repository is documented as a **Master's-level software and analytics project**.  
+# Purpose of this project
+
+- This project is designed to help businesses to generate reports based on csv files uploaded. Using this Web Application A small business can eleminate the need for a database developer since raw data downloaded from database and get the same result as a query. Also it's user friendly and doesn't need a developer to operate the app.
+
 It demonstrates how to design, implement, and evaluate a multi-agent decision-support system that combines:
+
 - an OLAP-style warehouse (DuckDB star schema),
 - LLM-assisted analytical reasoning,
 - and a reproducible full-stack deployment workflow.
@@ -18,12 +22,14 @@ It demonstrates how to design, implement, and evaluate a multi-agent decision-su
 Retail teams often need fast answers to complex questions (trend breaks, regional performance shifts, category risk, and KPI movement). Traditional dashboards provide slices of data but not decision-ready narratives.
 
 This project implements a multi-agent analytical system where specialized agents query curated warehouse aggregates and return structured reports (`executiveSummary`, `keyFindings`, `risks`, `recommendations`, `chartData`). The system supports two operating modes:
+
 - **LLM-enabled mode** (OpenAI via LangChain), and
 - **deterministic fallback mode** (no API key required), enabling reproducible local testing and robust demo behavior.
 
 ## 2. Problem Statement
 
 How can we build a reliable, explainable analytics assistant that:
+
 1. integrates OLAP data modeling with LLM-based insight generation,
 2. preserves stable output contracts for product integration,
 3. and remains usable when LLM services are unavailable?
@@ -46,12 +52,14 @@ How can we build a reliable, explainable analytics assistant that:
 ## 5. System Scope
 
 ### In Scope
+
 - Retail analytics Q&A through predefined agents.
 - DuckDB-backed OLAP-style querying using curated aggregation methods.
 - End-to-end flow: frontend -> API -> planner -> agent -> warehouse/history.
 - Local + containerized deployment; cloud blueprint with Render.
 
 ### Out of Scope
+
 - Real-time streaming ingestion.
 - Advanced role-based authorization.
 - Automated model fine-tuning.
@@ -60,6 +68,7 @@ How can we build a reliable, explainable analytics assistant that:
 ## 6. Architecture and Components
 
 Runtime pipeline:
+
 1. Frontend calls API (`/agents`, `/analyze`, `/history`).
 2. API validates payload and routes to `PlannerOrchestrator`.
 3. Planner resolves `agent_id` from `AGENT_REGISTRY`, executes selected agent, and stores run history.
@@ -90,15 +99,18 @@ Repository map:
 ## 8. API Contract
 
 Base URL:
+
 - Docker Compose default: `http://localhost:8001`
 - Direct Uvicorn default: `http://localhost:8000`
 
 ### `GET /health`
+
 ```json
 { "status": "ok" }
 ```
 
 ### `GET /agents`
+
 ```json
 {
   "agents": [
@@ -108,7 +120,9 @@ Base URL:
 ```
 
 ### `POST /analyze`
+
 Request:
+
 ```json
 {
   "user_id": "demo_user",
@@ -118,6 +132,7 @@ Request:
 ```
 
 Response shape:
+
 ```json
 {
   "history_id": "uuid",
@@ -143,45 +158,53 @@ Response shape:
 ```
 
 Validation limits:
+
 - `user_id`: 1..120 chars
 - `agent_id`: 1..80 chars
 - `prompt`: 1..3000 chars
 
 ### `GET /history?user_id=<id>&limit=<n>`
+
 - `limit` range: 1..200 (default 50)
 - Returns most recent first
 
 ## 9. Environment Variables
 
-| Variable | Required | Default | Used By | Notes |
-|---|---|---|---|---|
-| `OPENAI_API_KEY` | No | empty | API/agents | Missing key triggers deterministic fallback mode. |
-| `OPENAI_MODEL` | No | `gpt-4o-mini` | API/agents | LLM model for LangChain agent calls. |
-| `WAREHOUSE_DB_PATH` | No | `retail_warehouse.duckdb` | API/data_access | DuckDB file with star schema tables. |
-| `HISTORY_DB_PATH` | No | `agent_history.duckdb` | API/data_access | DuckDB file for `agent_history`. |
-| `CSV_PATH` | No | `global_retail_sales.csv` | API entrypoint | Used when warehouse DB must be built at startup. |
-| `CORS_ORIGINS` | No | built-in allowlist | API | Comma-separated origins. |
-| `VITE_API_URL` | Yes (frontend) | none | Frontend | Required for frontend API calls. |
-| `API_HOST_PORT` | No | `8001` | docker-compose | Host bind for API container port 8000. |
-| `FRONTEND_HOST_PORT` | No | `5174` | docker-compose | Host bind for frontend container port 5174. |
+| Variable             | Required       | Default                   | Used By         | Notes                                             |
+| -------------------- | -------------- | ------------------------- | --------------- | ------------------------------------------------- |
+| `OPENAI_API_KEY`     | No             | empty                     | API/agents      | Missing key triggers deterministic fallback mode. |
+| `OPENAI_MODEL`       | No             | `gpt-4o-mini`             | API/agents      | LLM model for LangChain agent calls.              |
+| `WAREHOUSE_DB_PATH`  | No             | `retail_warehouse.duckdb` | API/data_access | DuckDB file with star schema tables.              |
+| `HISTORY_DB_PATH`    | No             | `agent_history.duckdb`    | API/data_access | DuckDB file for `agent_history`.                  |
+| `CSV_PATH`           | No             | `global_retail_sales.csv` | API entrypoint  | Used when warehouse DB must be built at startup.  |
+| `CORS_ORIGINS`       | No             | built-in allowlist        | API             | Comma-separated origins.                          |
+| `VITE_API_URL`       | Yes (frontend) | none                      | Frontend        | Required for frontend API calls.                  |
+| `API_HOST_PORT`      | No             | `8001`                    | docker-compose  | Host bind for API container port 8000.            |
+| `FRONTEND_HOST_PORT` | No             | `5174`                    | docker-compose  | Host bind for frontend container port 5174.       |
 
 ## 10. Reproducible Setup
 
 ### Option A: Docker Compose (recommended)
 
 1. Configure `.env`:
+
 ```bash
 OPENAI_API_KEY=...
 ```
+
 2. Start:
+
 ```bash
 docker compose up --build
 ```
+
 3. Validate:
+
 - Frontend: `http://localhost:5174`
 - API health: `http://localhost:8001/health`
 
 Optional host-port override:
+
 ```bash
 API_HOST_PORT=8000 FRONTEND_HOST_PORT=5173 docker compose up --build
 ```
@@ -189,6 +212,7 @@ API_HOST_PORT=8000 FRONTEND_HOST_PORT=5173 docker compose up --build
 ### Option B: Run Services Directly
 
 Backend:
+
 ```bash
 pip install -r requirements.txt
 python data_access/build_star_schema.py --db retail_warehouse.duckdb --csv global_retail_sales.csv
@@ -196,6 +220,7 @@ uvicorn api.main:app --reload
 ```
 
 Frontend:
+
 ```bash
 cd frontend
 npm install
@@ -205,6 +230,7 @@ npm run dev
 ```
 
 Smoke test:
+
 ```bash
 python scripts/check_api.py --base-url http://127.0.0.1:8001
 ```
@@ -214,17 +240,20 @@ python scripts/check_api.py --base-url http://127.0.0.1:8001
 Use this section as your baseline methodology chapter.
 
 ### 11.1 Technical Metrics
+
 - API latency (`/analyze`) with and without LLM.
 - Error rate by endpoint and by failure class (invalid payload, unknown agent, model failure).
 - Contract conformance: percentage of responses matching required report schema.
 - Fallback reliability: successful response rate when `OPENAI_API_KEY` is absent.
 
 ### 11.2 Analytical Quality Metrics
+
 - Expert review score of `executiveSummary`, `keyFindings`, and `recommendations`.
 - Hallucination incidence (claims not supported by warehouse aggregates).
 - Actionability rating from target users (e.g., analysts/managers).
 
 ### 11.3 Suggested Experiment Design
+
 1. Define a fixed benchmark set of prompts (KPI, trend, category, region, risk).
 2. Run each prompt in LLM mode and fallback mode.
 3. Compare output quality, latency, and consistency.

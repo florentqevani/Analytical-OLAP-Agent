@@ -1,76 +1,177 @@
-# Prompt Library
+#GptPrompts used for building this app
 
-This file contains ready-to-use prompts for the agents in this project.
+1-
+build this structure olap-ai-platform/
+backend/
+app/
+main.py
+core/
+config.py
+db.py
+orchestrator/
+planner.py
+memory.py
+agents/
+:contentReference[oaicite:7]{index=7} cube_ops.py
+kpi_calculator.py
+report_generator.py
+data_access/
+queries.py
+schemas/
+api.py
+requirements.txt
+Dockerfile
+frontend/
+index.html
+package.json
+src/
+main.jsx
+App.jsx
+api.js
+Dockerfile
+db/
+ddl.sql
+data/
+global_retail_sales.csv # (your dataset)
+docker-compose.yml
+README.md
 
-## Quick Start
+2-
+debug main.py
 
-Use any prompt below in the frontend prompt box or in `POST /analyze`:
+3-
+build docker configuration files
 
-```json
-{
-  "user_id": "demo_user",
-  "agent_id": "kpi_calculator",
-  "prompt": "Analyze month-over-month and year-over-year revenue and profit trends, then list key risks and recommended actions."
-}
-```
+4-
+using this prompt build the functional app
 
-## Agent-Specific Prompts
+5-
+the deployed project dosent work, the agents dont show and are inactive, database dont work
 
-### `dimension_navigator`
+6-
+You are a senior full-stack engineer. Fix my production deployment so the Netlify frontend correctly loads agents/data from my FastAPI backend on Render.
 
-1. Drill down revenue from year to quarter to month and identify the strongest and weakest periods.
-2. Roll up monthly performance to quarter and year; explain whether growth is broad-based or concentrated.
-3. Compare category performance across time hierarchy levels and highlight where trends change direction.
+PROD URLS
 
-### `cube_operations`
+- Frontend (Netlify): https://superb-tiramisu-dcfab1.netlify.app/
+- Backend (Render): https://analytical-olap-agent.onrender.com
 
-1. Slice revenue for one region and summarize category leaders and laggards.
-2. Dice by region and category to find combinations with high revenue but low profit.
-3. Pivot the analysis from category-first to region-first and explain what decisions change.
+CONFIRMED BACKEND ROUTES (working)
 
-### `kpi_calculator`
+- GET https://analytical-olap-agent.onrender.com/agents -> 200
+- GET https://analytical-olap-agent.onrender.com/health -> 200
+- GET https://analytical-olap-agent.onrender.com/docs -> 200
+- GET https://analytical-olap-agent.onrender.com/openapi.json -> 200
+  NOTE: /api and /api/agents return 404. Do not use /api/\*.
 
-1. Calculate month-over-month and year-over-year revenue growth, including top positive and negative shifts.
-2. Compute profit margin trends and identify periods where margin deteriorates despite revenue growth.
-3. Rank top 5 regions by revenue and profit, then state concentration risk.
+SYMPTOMS
 
-### `report_generator`
+- On Netlify, agents are not showing.
+- Database-related functionality is not working.
 
-1. Generate an executive business report with summary, key findings, risks, recommendations, and chart-ready data.
-2. Create a board-ready quarterly performance report with clear priorities for the next quarter.
-3. Produce a concise operations report focused on revenue drivers, profit pressure points, and immediate actions.
+ASSUMED REPO STRUCTURE
 
-### `visualization`
+- frontend/ contains a Vite + React app (build output dist/)
+- backend/ or root contains FastAPI app
 
-1. Recommend the best chart structure for revenue by region and return chart-ready series values.
-2. Build chart data for category contribution and label each point clearly for dashboard use.
-3. Return a period-over-period trend chart data series and include an appropriate metric/unit.
+GOALS
 
-### `anomaly_detection`
+1. Netlify site renders agents by fetching the correct backend routes (no /api/\* 404).
+2. No browser CORS errors. Netlify origin must be allowed.
+3. DB-backed endpoints work in production (identify failures, fix env/config/migrations).
 
-1. Detect unusual revenue or profit patterns by period and explain potential business impact.
-2. Identify outlier regions or categories and classify each anomaly by severity.
-3. Flag sudden trend breaks, suggest likely causes, and propose follow-up checks.
+TASKS (END-TO-END)
 
-## Benchmark Prompt Set
+A) FRONTEND: locate and fix API usage
 
-Use this fixed set for LLM vs fallback comparisons (quality, latency, consistency):
+- Search frontend/ for: "/api", "localhost", "127.0.0.1", "onrender.com", "fetch(", "axios", "API*URL", "BASE_URL", "VITE*".
+- Identify where agents are fetched and update to call ${VITE_API_URL}/agents.
+- Ensure ALL API calls use:
+  const API = import.meta.env.VITE_API_URL;
+  fetch(${API}/agents)
+- If any code uses relative fetch("/agents") or "/api/agents", fix it.
 
-1. Analyze MoM and YoY revenue changes and summarize the top 3 movements.
-2. Identify the highest and lowest performing regions by revenue and profit.
-3. Compare category revenue contribution and highlight concentration risk.
-4. Find periods where profit margin drops while revenue grows.
-5. Detect anomalous spikes or drops and rank them by potential business impact.
-6. Create an executive summary with risks and actionable recommendations.
-7. Suggest the best chart for regional comparison and return chart-ready data.
-8. Drill down from year to quarter to month to explain a major trend change.
-9. Slice to one region and explain what drives performance in that slice.
-10. Dice by region and category and highlight weak combinations.
+B) FRONTEND: add a small API client layer + error state
 
-## Prompt Writing Guidelines
+- Create frontend/src/services/api.(js|ts):
+  - const API = import.meta.env.VITE_API_URL
+  - export async function getAgents() { fetch(${API}/agents) ... throw on !ok }
+- Update UI to use this client.
+- Add minimal user-visible error UI when agents fail to load (avoid blank screen).
 
-1. Include objective + scope + expected output in one request.
-2. Ask for explicit comparisons (MoM, YoY, region vs region, category vs category).
-3. Request business impact and concrete recommendations, not only description.
-4. Keep prompts under the API limit (`3000` characters).
-5. If using uploaded CSV context from the frontend, keep sample rows short and relevant.
+C) NETLIFY CONFIG
+
+- Add/update netlify.toml at repo root:
+  [build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+- Add frontend/.env.production:
+  VITE_API_URL=https://analytical-olap-agent.onrender.com
+- Ensure Vite uses import.meta.env.VITE_API_URL and builds without localhost assumptions.
+
+D) FASTAPI: configure CORS correctly (production-safe)
+
+- In FastAPI app startup code (main.py/app.py), add:
+  from fastapi.middleware.cors import CORSMiddleware
+
+  app.add_middleware(
+  CORSMiddleware,
+  allow_origins=[
+  "https://superb-tiramisu-dcfab1.netlify.app",
+  "http://localhost:5173",
+  "http://localhost:3000"
+  ],
+  allow_credentials=True,
+  allow_methods=["*"],
+  allow_headers=["*"],
+  )
+
+- Confirm CORS is not duplicated or overridden elsewhere.
+
+E) DB DEBUG + FIX (Render)
+
+- Determine DB type used (Postgres/MySQL/SQLite).
+- If using Postgres on Render:
+  - ensure app reads DATABASE_URL (or equivalent) from env
+  - ensure SQLAlchemy/async driver uses correct format and SSL if required
+  - ensure migrations are run (Alembic) or tables are created on startup
+- If using SQLite:
+  - note Render filesystem is ephemeral unless a persistent disk is attached; recommend migrating to Render Postgres OR using a persistent disk path.
+- Use openapi.json to identify DB-backed endpoints used by frontend.
+- Add a quick “startup check” log that prints whether DB connection succeeds (without printing secrets).
+
+F) VERIFY LOCALLY
+
+- Run:
+  - cd frontend && npm ci && npm run build
+- Run backend tests or a minimal uvicorn run if feasible.
+- Add a simple script or command that hits:
+  - GET /health
+  - GET /agents
+    and prints JSON response to verify.
+
+G) COMMIT + PUSH
+
+- Make minimal clean commits:
+  1. "Fix frontend API base and /agents calls"
+  2. "Netlify: build from frontend"
+  3. "FastAPI: enable CORS for Netlify"
+  4. "Backend: DB config fixes" (if needed)
+- Output the exact git commands used.
+
+DELIVERABLES
+
+- Code changes that make production work:
+  - frontend uses VITE_API_URL + correct routes
+  - netlify.toml correct base/publish
+  - FastAPI CORS configured for Netlify
+  - DB env/config fixed if broken
+- A concise summary of root causes and fixes.
+- A redeploy checklist: pushing to main triggers Netlify + Render, and Netlify env var VITE_API_URL should be set.
+
+IMPORTANT
+
+- Do not introduce breaking refactors.
+- Prefer minimal, targeted fixes.
+- Treat openapi.json as the source of truth for available backend routes.
