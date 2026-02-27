@@ -11,6 +11,7 @@ It demonstrates how to design, implement, and evaluate a multi-agent decision-su
 - [Architecture Overview](ARCHITECTURE.md)
 - [Star Schema Documentation](data_access/STAR_SCHEMA.md)
 - [Frontend Documentation](frontend/README.md)
+- [Prompt Library](PROMPTS.md)
 
 ## 1. Project Abstract
 
