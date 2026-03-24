@@ -19,6 +19,7 @@ npm run dev
 ## Local Development
 
 ```bash
+cd src/frontend
 npm install
 npm run dev
 ```
@@ -31,7 +32,7 @@ Default Vite dev URL is typically `http://localhost:5173`.
 - `GET /history?user_id=<id>&limit=<n>`
 - `POST /analyze`
 
-Implemented in `src/services/api.js` with centralized error handling.
+Implemented in `src/frontend/src/services/api.js` with centralized error handling.
 
 ## Contract Expectations
 
@@ -45,8 +46,8 @@ The UI expects `POST /analyze` responses to include:
 - `result.report.chartData.series[]` with numeric values
 
 If this contract changes, update:
-- `buildConversation` in `src/App.jsx`
-- `buildChartModel` in `src/App.jsx`
+- `buildConversation` in `src/frontend/src/App.jsx`
+- `buildChartModel` in `src/frontend/src/App.jsx`
 
 ## Build for Static Hosting
 
@@ -54,4 +55,4 @@ If this contract changes, update:
 npm run build
 ```
 
-Artifacts are emitted to `frontend/dist` and used by the Render static service.
+Artifacts are emitted to `src/frontend/dist` and used by the Render static service.

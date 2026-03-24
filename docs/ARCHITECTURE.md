@@ -2,29 +2,29 @@
 
 ## Layers and Responsibilities
 
-### `frontend/` (React + Vite)
-- Calls API endpoints through `frontend/src/services/api.js`.
+### `src/frontend/` (React + Vite)
+- Calls API endpoints through `src/frontend/src/services/api.js`.
 - Renders agent output assuming a stable result contract:
   - `result.message`
   - `result.report.{title, executiveSummary, keyFindings, risks, recommendations, chartHint, chartData}`
 - Uses `VITE_API_URL` at build/runtime. If missing, calls are blocked with explicit errors.
 
-### `api/` (FastAPI boundary)
-- `api/main.py` defines transport concerns:
+### `src/api/` (FastAPI boundary)
+- `src/api/main.py` defines transport concerns:
   - CORS configuration (`CORS_ORIGINS` or default allowlist)
   - startup DB health probes
   - HTTP -> orchestrator mapping
   - input validation and HTTP error mapping
-- `api/schemas.py` defines external request/response contracts.
+- `src/api/schemas.py` defines external request/response contracts.
 
-### `planner/` (application service)
+### `src/planner/` (application service)
 - `PlannerOrchestrator` owns:
   - agent lookup and dispatch (`AGENT_REGISTRY`)
   - run persistence in history store
   - response envelope returned to API layer
 - This layer is intentionally thin; no transport/UI dependencies.
 
-### `agents/` (domain behavior)
+### `src/agents/` (domain behavior)
 - `AnalyticsAgent` is the runtime interface.
 - `LangChainAnalyticsAgent`:
   - gathers warehouse aggregates
@@ -33,7 +33,7 @@
   - falls back to deterministic report when LLM call cannot run
 - Agent specializations are declarative in `AGENT_REGISTRY`.
 
-### `data_access/` (persistence adapters)
+### `src/data_access/` (persistence adapters)
 - `StarSchemaWarehouse`: query helpers over DuckDB star schema.
 - `HistoryStore`: append/read agent runs in `agent_history` table.
 - `build_star_schema.py` + `star_schema.sql`: one-time/recurring warehouse build pipeline from CSV.

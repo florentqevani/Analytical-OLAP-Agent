@@ -1,4 +1,4 @@
-from agents.langchain_agent import LangChainAnalyticsAgent
+from src.agents.langchain_agent import LangChainAnalyticsAgent
 
 AGENT_REGISTRY = {
     "dimension_navigator": LangChainAnalyticsAgent(

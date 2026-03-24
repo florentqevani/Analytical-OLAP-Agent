@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from agents import AGENT_REGISTRY
-from data_access.history_store import HistoryStore
-from data_access.warehouse import StarSchemaWarehouse
+from src.agents import AGENT_REGISTRY
+from src.data_access.history_store import HistoryStore
+from src.data_access.warehouse import StarSchemaWarehouse
 
 
 class PlannerOrchestrator:

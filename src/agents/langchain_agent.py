@@ -7,9 +7,9 @@ from typing import Any
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
-from agents.base import AnalyticsAgent
-from agents.models import AgentRunResult
-from data_access.warehouse import StarSchemaWarehouse
+from src.agents.base import AnalyticsAgent
+from src.agents.models import AgentRunResult
+from src.data_access.warehouse import StarSchemaWarehouse
 
 
 class LangChainAnalyticsAgent(AnalyticsAgent):

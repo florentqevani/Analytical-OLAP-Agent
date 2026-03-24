@@ -36,11 +36,11 @@ This project materializes `global_retail_sales.csv` into a star schema in DuckDB
 
 Command:
 ```bash
-python data_access/build_star_schema.py --db retail_warehouse.duckdb --csv global_retail_sales.csv
+python src/data_access/build_star_schema.py --db retail_warehouse.duckdb --csv global_retail_sales.csv
 ```
 
 What it does:
-1. Loads and parameterizes `data_access/star_schema.sql` with absolute CSV path.
+1. Loads and parameterizes `src/data_access/star_schema.sql` with absolute CSV path.
 2. Drops and recreates all schema tables.
 3. Prints row counts for `fact_sales` and each dimension.
 
@@ -56,7 +56,7 @@ The runtime app currently relies on these aggregate shapes:
 - revenue by `category`
 - revenue by `year/quarter/month`
 
-Those are implemented in `data_access/warehouse.py` and consumed by agents.
+Those are implemented in `src/data_access/warehouse.py` and consumed by agents.
 
 ## Validation Queries
 
@@ -78,7 +78,7 @@ FROM fact_sales;
 ## Modification Guidelines
 
 - If you add a new dimension or measure, update:
-  - `data_access/star_schema.sql`
-  - `data_access/warehouse.py` query helpers
+  - `src/data_access/star_schema.sql`
+  - `src/data_access/warehouse.py` query helpers
   - any agent prompts/logic that reference available aggregates
 - Keep schema rebuild deterministic and idempotent with respect to source CSV content.

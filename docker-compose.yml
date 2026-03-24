@@ -2,7 +2,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: api/Dockerfile
+      dockerfile: src/api/Dockerfile
     env_file:
       - .env
     environment:
@@ -19,7 +19,7 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ./src/frontend
       dockerfile: Dockerfile
     environment:
       VITE_API_URL: http://localhost:${API_HOST_PORT:-8001}

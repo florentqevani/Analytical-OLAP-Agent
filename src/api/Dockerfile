@@ -10,8 +10,8 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY . /app
 
-RUN chmod +x /app/api/entrypoint.sh
+RUN chmod +x /app/src/api/entrypoint.sh
 
 EXPOSE 8000
 
-CMD ["/app/api/entrypoint.sh"]
+CMD ["/app/src/api/entrypoint.sh"]

@@ -56,8 +56,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--sql",
         type=Path,
-        default=Path("data_access/star_schema.sql"),
-        help="SQL schema file path (default: data_access/star_schema.sql)",
+        default=Path("src/data_access/star_schema.sql"),
+        help="SQL schema file path (default: src/data_access/star_schema.sql)",
     )
     return parser.parse_args()
 

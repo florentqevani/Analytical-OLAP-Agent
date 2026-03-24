@@ -2,7 +2,7 @@
 
 # Purpose of this project
 
-- This project is designed to help businesses to generate reports based on csv files uploaded. Using this Web Application A small business can eleminate the need for a database developer since raw data downloaded from database and get the same result as a query. Also it's user friendly and doesn't need a developer to operate the app.
+- This project helps businesses generate reports from uploaded CSV files. The application is designed to reduce the need for manual database querying by turning raw retail data into warehouse-backed analytics reports through a simple web interface.
 
 It demonstrates how to design, implement, and evaluate a multi-agent decision-support system that combines:
 
@@ -13,9 +13,8 @@ It demonstrates how to design, implement, and evaluate a multi-agent decision-su
 ## Documentation Index
 
 - [Architecture Overview](ARCHITECTURE.md)
-- [Star Schema Documentation](data_access/STAR_SCHEMA.md)
+- [Star Schema Documentation](data/STAR_SCHEMA.md)
 - [Frontend Documentation](frontend/README.md)
-- [Prompt Library](PROMPTS.md)
 
 ## 1. Project Abstract
 
@@ -79,12 +78,14 @@ Repository map:
 
 ```text
 .
-|-- api/                    # FastAPI app + request/response schemas
-|-- agents/                 # Agent interface + LangChain implementation + registry
-|-- planner/                # Run coordination and history writes
-|-- data_access/            # DuckDB warehouse + history adapters + schema SQL
-|-- frontend/               # React client
-|-- scripts/check_api.py    # API smoke check
+|-- docs/                   # Project documentation
+|-- src/agents/            # Agent interface + LangChain implementation + registry
+|-- src/api/               # FastAPI app + request/response schemas
+|-- src/data_access/       # DuckDB warehouse + history adapters + schema SQL
+|-- src/frontend/          # React client
+|-- src/planner/           # Run coordination and history writes
+|-- src/scripts/check_api.py
+|-- src/generate_dataset.py
 |-- render.yaml             # Render Blueprint (API + static frontend)
 `-- docker-compose.yml      # Local multi-service stack
 ```
@@ -215,14 +216,14 @@ Backend:
 
 ```bash
 pip install -r requirements.txt
-python data_access/build_star_schema.py --db retail_warehouse.duckdb --csv global_retail_sales.csv
-uvicorn api.main:app --reload
+python src/data_access/build_star_schema.py --db retail_warehouse.duckdb --csv global_retail_sales.csv
+uvicorn src.api.main:app --reload
 ```
 
 Frontend:
 
 ```bash
-cd frontend
+cd src/frontend
 npm install
 # PowerShell example:
 $env:VITE_API_URL="http://localhost:8000"
@@ -232,7 +233,7 @@ npm run dev
 Smoke test:
 
 ```bash
-python scripts/check_api.py --base-url http://127.0.0.1:8001
+python src/scripts/check_api.py --base-url http://127.0.0.1:8001
 ```
 
 ## 11. Evaluation Plan (Master's Project)
@@ -263,12 +264,12 @@ Use this section as your baseline methodology chapter.
 
 - `render.yaml` provisions both API and static frontend services.
 - API startup checks warehouse and history DB connectivity.
-- In containerized mode, `api/entrypoint.sh` can build warehouse DB automatically if missing.
+- In containerized mode, `src/api/entrypoint.sh` can build warehouse DB automatically if missing.
 - History is persisted in DuckDB; Docker Compose uses `duckdb_data` volume for persistence.
 
 ## 13. Extending the Project
 
-1. Register a new agent in `agents/__init__.py` (`AGENT_REGISTRY`).
+1. Register a new agent in `src/agents/__init__.py` (`AGENT_REGISTRY`).
 2. Implement behavior by extending `AnalyticsAgent` or reusing `LangChainAnalyticsAgent`.
 3. Preserve response schema (`message` + `report`) because frontend rendering depends on it.
 4. Add benchmark prompts and tests before introducing major agent logic changes.

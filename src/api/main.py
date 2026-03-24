@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.schemas import AnalyzeRequest, AnalyzeResponse, HistoryResponse
-from data_access import HistoryStore, StarSchemaWarehouse
-from planner import PlannerOrchestrator
+from src.api.schemas import AnalyzeRequest, AnalyzeResponse, HistoryResponse
+from src.data_access import HistoryStore, StarSchemaWarehouse
+from src.planner import PlannerOrchestrator
 
 app = FastAPI(title="Retail Analytics API", version="1.0.0")
 load_dotenv()

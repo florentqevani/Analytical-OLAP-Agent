@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: sh api/entrypoint.sh
+    startCommand: sh src/api/entrypoint.sh
     healthCheckPath: /health
     envVars:
       - key: OPENAI_API_KEY
@@ -24,8 +24,8 @@ services:
   - type: web
     name: analytical-olap-agent-frontend
     runtime: static
-    buildCommand: cd frontend && npm ci && npm run build
-    staticPublishPath: frontend/dist
+    buildCommand: cd src/frontend && npm ci && npm run build
+    staticPublishPath: src/frontend/dist
     envVars:
       - key: VITE_API_URL
         fromService:
