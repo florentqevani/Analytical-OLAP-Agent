@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { analyzePrompt, getAgents, getHistory } from "./services/api";
+import ChartPanel from "./components/ChartPanel";
 
 const DEFAULT_USER_ID = "demo_user";
 const DEFAULT_PROMPT =
@@ -142,11 +143,6 @@ function App() {
   const chartModel = useMemo(
     () => buildChartModel(activeRunResult),
     [activeRunResult],
-  );
-  const chartSeries = chartModel.series;
-  const chartMax = chartSeries.reduce(
-    (max, item) => Math.max(max, item.value),
-    0,
   );
 
   async function loadAgents() {
@@ -356,42 +352,7 @@ function App() {
         </section>
       </section>
 
-      <section className="panel charts-panel">
-        <div className="panel-head">
-          <h2>Charts</h2>
-          <span className="pill metric-pill">
-            {chartModel.dimension} / {chartModel.metric}
-          </span>
-        </div>
-        {chartSeries.length === 0 ? (
-          <p className="meta">
-            Run an agent to generate chart data from the analysis response.
-          </p>
-        ) : (
-          <div className="chart-wrap">
-            <h3>
-              {chartModel.title}
-              {chartModel.unit ? ` (${chartModel.unit})` : ""}
-            </h3>
-            <div className="chart-bars">
-              {chartSeries.map((item) => (
-                <div className="bar-row" key={item.label}>
-                  <span className="bar-label">{item.label}</span>
-                  <div className="bar-track">
-                    <div
-                      className="bar-fill"
-                      style={{
-                        width: `${chartMax > 0 ? Math.max(6, (item.value / chartMax) * 100) : 0}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="bar-value">{item.value.toFixed(2)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </section>
+      <ChartPanel chartModel={chartModel} />
 
       <section className="panel history">
         <div className="panel-head">
