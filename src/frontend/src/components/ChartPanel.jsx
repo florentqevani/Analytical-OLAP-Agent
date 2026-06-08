@@ -243,7 +243,7 @@ async function captureChartAsImage(containerEl, title) {
 
 export default function ChartPanel({ chartModel }) {
     const [chartType, setChartType] = useState("Bar");
-    const [copyLabel, setCopyLabel] = useState("Copy Image");
+    const [copyLabel, setCopyLabel] = useState("Copy");
     const wrapRef = useRef(null);
 
     const data = (chartModel?.series ?? []).map((item) => ({
@@ -264,7 +264,7 @@ export default function ChartPanel({ chartModel }) {
         } catch {
             setCopyLabel("Failed");
         } finally {
-            setTimeout(() => setCopyLabel("Copy Image"), 2200);
+            setTimeout(() => setCopyLabel("Copy"), 2200);
         }
     }
 
